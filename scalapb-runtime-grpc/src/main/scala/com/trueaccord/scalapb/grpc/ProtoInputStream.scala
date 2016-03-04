@@ -42,9 +42,6 @@ private class ProtoInputStream(var state: State) extends InputStream {
     state match {
       case NotStarted(message) =>
         message.serializedSize match {
-          case 0 =>
-            state = Done
-            -1
           case size if len >= size =>
             val stream = CodedOutputStream.newInstance(b, off, size)
             message.writeTo(stream)

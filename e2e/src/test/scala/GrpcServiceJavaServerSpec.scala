@@ -1,6 +1,7 @@
 
 import com.trueaccord.pb.Service1ScalaImpl
 import com.trueaccord.proto.e2e.service.{Service1Grpc => Service1GrpcScala, _}
+import com.trueaccord.scalapb.grpc.Marshaller
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -28,10 +29,16 @@ class GrpcServiceJavaServerSpec extends GrpcServiceSpecBase {
 
     it("clientStreamingCount") {
       withJavaServer { channel =>
+        val marshaller = new Marshaller(Req2)
+        val stream = marshaller.stream(Req2())
+        val bytes = new Array[Byte](stream.available())
+        stream.read(bytes)
+        assert(bytes.toSeq === Nil)
+        println("bytes ==" + bytes.toSeq.toString)
         val client = Service1GrpcScala.stub(channel)
         val (responseObserver, future) = getObserverAndFuture[Res2]
         val requestObserver = client.clientStreamingCount(responseObserver)
-        val n = Random.nextInt(10)
+        val n = 1 // Random.nextInt(10)
         for (_ <- 1 to n) {
           requestObserver.onNext(Req2())
         }
